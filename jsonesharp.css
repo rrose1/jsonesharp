@@ -1,0 +1,32 @@
+body {
+    background-color: #F0F0F0;
+    font-family: monospace;
+}
+
+#clear_program {
+    font-size: smaller;
+}
+
+.clear_register {
+    font-size: smaller;
+}
+
+#evaluate {
+    font-size: smaller;
+}
+
+#evaluate_nonint {
+    font-size: smaller;
+}
+
+#interrupt {
+    font-size: smaller;
+}
+
+#add_register {
+    font-size: smaller;
+}
+
+#remove_register {
+    font-size: smaller;
+}

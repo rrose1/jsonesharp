@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>js1#</title>
+    
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="jsonesharp.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="jsonesharp.js"></script>
+    
+  </head>
+  
+  <body>
+    <div class="container">
+
+      <!-- Page header -->
+      
+      <div class="page-header">
+	<h4>js1#: <small>a 1# interpreter for web browsers</small></h4>
+      </div>
+
+      <!-- Register machine starts here -->
+      <div class="form-horizontal" id="rm">
+
+	<label for="program">program editor</label>
+	<div class="form-group">
+	  <div class="col-sm-10">
+	    <textarea class="form-control" rows="8" id="program"></textarea>
+	  </div>
+	  <div class="col-sm-2 row-sm-offset-1">
+	    <div class="btn-group-vertical" role="group" aria-label="...">
+	      <button type="button" class="btn btn-default" id="clear_program">
+		clear
+	      </button>
+	      <button type="button" class="btn btn-default" id="add_register">
+	      </button>
+	      <button type="button" class="btn btn-default" id="remove_register">
+	      </button>
+	      <button type="button" class="btn btn-default" id="evaluate">
+		evaluate
+	      </button>
+	      <button type="button" class="btn btn-default" id="interrupt">
+		interrupt
+	      </button>
+	      <button type="button" class="btn btn-default" id="evaluate_nonint">
+		non-int eval
+	      </button>
+
+	    </div>
+	  </div>
+	</div>
+
+	<!-- Registers to appear here -->
+	
+      </div>
+      <!-- Register machine ends here -->
+      
+    </div>
+    
+  </body>
+</html>
