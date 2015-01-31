@@ -134,7 +134,7 @@ var ones_hashes = function(p, pos) {
         n_ones++;
         pos++;
     }
-    while (pos < p.length && p[pos]=='#' && n_hashes < 6) {
+    while (pos < p.length && p[pos]=='#' && n_hashes < 5) {
         n_hashes++;
         pos++;
     }
@@ -153,7 +153,7 @@ var ones_hashes_backward = function(p, pos) {
     
     pos--;
 
-    while (p[pos]=='#' && n_hashes < 6) {
+    while (p[pos]=='#' && n_hashes < 5) {
         n_hashes++;
         if (pos==0) {
             return [n_ones, n_hashes, pos];
