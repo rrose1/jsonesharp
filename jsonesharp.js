@@ -121,11 +121,7 @@ var clean = function(p) {
     
 };
 
-//
-// 1# intepreter
-//
-
-var ones_hashes = function(p, pos) {
+var parse_ones_hashes = function(p, pos) {
 
     var n_ones = 0;
     var n_hashes = 0;
@@ -142,63 +138,67 @@ var ones_hashes = function(p, pos) {
     return [n_ones, n_hashes, pos]
 };
 
-var ones_hashes_backward = function(p, pos) {
+var parse = function(p) {
 
-    var n_ones = 0
-    var n_hashes = 0
-    
-    if (pos==0) {
-        return [0, 0, 0];
-    }
-    
-    pos--;
+    var parsed = [];
+    var inst = [0, 0, 0];
+    var n_ones = 0;
+    var n_hashes = 0;
+    var pos = 0
+    var new_pos = 0;
 
-    while (p[pos]=='#' && n_hashes < 5) {
-        n_hashes++;
-        if (pos==0) {
-            return [n_ones, n_hashes, pos];
+    while (pos < p.length) {
+
+	inst = parse_ones_hashes(p, pos);
+	n_ones = inst[0];
+	n_hashes = inst[1];
+	new_pos = inst[2];
+	
+	if (n_ones==0 || n_hashes==0) {
+	    break;
 	}
-        pos--;
-    }
-    while (p[pos]=='1') {
-        n_ones++;
-        if (pos==0) {
-            return [n_ones, n_hashes, pos];
-	}
-        pos--;
+	
+	parsed.push([n_ones, n_hashes]);
+	pos = new_pos;
     }
     
+    return [pos, parsed];
+};
+
+//
+// 1# intepreter
+//
+
+var ones_hashes = function(p, pos) {
+
+    if (pos==p.length) {
+	return [0, 0, pos];
+    };
+    
+    var n_ones = p[pos][0];
+    var n_hashes = p[pos][1];
     pos++;
-
-    return [n_ones, n_hashes, pos]
+    
+    return [n_ones, n_hashes, pos];
 };
 
 var transfer = function(p, pos, n, backward) {
-    
-    var start = pos;
-    var inst = [0,0,0];
-    var n_ones = 0;
-    var n_hashes = 0;
-    
-    while (n > 0) {
-        if (backward) {
-	    inst = ones_hashes_backward(p, pos);
-	}
-        else {
-            inst = ones_hashes(p, pos);
-	}
-	
-        n_ones = inst[0];
-	n_hashes = inst[1];
-	pos = inst[2];
 
-        if (n_ones==0 || n_hashes==0) {
-            pos = start;
-            break;
+    var new_pos = 0;
+    
+    if (backward) {
+	new_pos = pos - n;
+	if (new_pos < 0) {
+	    return pos;
 	}
-        n--;
+	return new_pos;
     }
-    return pos;
+
+    new_pos = pos + n;
+    if (new_pos > p.length) {
+	return pos;
+    }
+    return new_pos;    
 };
 
 var cases = function(p, pos, n) {
@@ -220,7 +220,7 @@ var cases = function(p, pos, n) {
 	new_pos = transfer(p, pos, 1);
     }
     else {
-	if (data.charAt(i)=='1') {
+	if (data[i]=='1') {
 	    new_pos = transfer(p, pos, 2);
 	}
 	else {
@@ -302,7 +302,14 @@ var evaluate_nonint = function() {
     var new_pos = 0;
     
     p = clean(p);
-
+    var parsed = parse(p);
+    var parser_pos = parsed[0];
+    if (parser_pos < p.length) {
+	console.log('1# syntax error');
+	return;
+    }
+    p = parsed[1]
+    
     $('#interrupt').prop('disabled', true);
     $('#evaluate').prop('disabled', true);
     $('#evaluate_nonint').prop('disabled', true);
@@ -310,10 +317,10 @@ var evaluate_nonint = function() {
     while (true) {
         new_pos = step(p, pos);
         if (new_pos==pos) {
-	    eval_buttons_ready();
+    	    eval_buttons_ready();
             break;
-	}
-	pos = new_pos;
+    	}
+    	pos = new_pos;
     }
 
     return;
@@ -333,6 +340,13 @@ var evaluate = function() {
     new_pos = 0;
     
     p = clean(p);
+    var parsed = parse(p);
+    var parser_pos = parsed[0];
+    if (parser_pos < p.length) {
+	console.log('1# syntax error');
+	return;
+    }
+    p = parsed[1]
 
     $('#interrupt').prop('disabled', false);
     $('#evaluate').prop('disabled', true);
