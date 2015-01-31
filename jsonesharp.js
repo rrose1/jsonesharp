@@ -11,7 +11,7 @@ var clear_program = function() {
 
 
 //
-// Register management routines
+// DOM register management routines
 //
 
 var new_register = function(n) {
@@ -95,11 +95,53 @@ var remove_last_register = function() {
     var m = $('.register').length;
 
     if (m > 1) {
-	var sel = '#'.concat('form_group_register_'.concat(m));
+	var sel = '#'.concat('form_group_register_'.concat(m.toString()));
 	$(sel).remove();
 	update_register_buttons(m);
     }
 
+    return;
+};
+
+//
+// functions for copying registers stored in an array (starting at
+// index 1) to DOM and back.
+//
+
+var dom_regs_to_array = function() {
+
+    var dom_regs = $('.register')
+    var regs = [''];
+    
+    var i = 0;
+    while (i < dom_regs.length) {
+	regs.push($('#register_'.concat((i+1).toString())).val());
+	i++;
+    }
+    
+    return regs;
+};
+
+var array_to_dom_regs = function(regs) {
+
+    var m = $('.registers').length
+    
+    if (regs.length < m) {
+	while (regs.length < m) {
+	    remove_last_register();
+	    m--;
+	}
+    }
+    else {
+	extend_registers(regs.length-1);
+    }
+
+    var i = 1;
+    while (i <= regs.length) {
+	$('#register_'.concat(i.toString())).val(regs[i]);
+	i++;
+    }
+    
     return;
 };
 
@@ -166,179 +208,25 @@ var parse = function(p) {
 };
 
 //
-// 1# intepreter
+// Button events and states
 //
 
-var ones_hashes = function(p, pos) {
-
-    if (pos==p.length) {
-	return [0, 0, pos];
-    };
-    
-    var n_ones = p[pos][0];
-    var n_hashes = p[pos][1];
-    pos++;
-    
-    return [n_ones, n_hashes, pos];
-};
-
-var transfer = function(p, pos, n, backward) {
-
-    var new_pos = 0;
-    
-    if (backward) {
-	new_pos = pos - n;
-	if (new_pos < 0) {
-	    return pos;
-	}
-	return new_pos;
-    }
-
-    new_pos = pos + n;
-    if (new_pos > p.length) {
-	return pos;
-    }
-    return new_pos;    
-};
-
-var cases = function(p, pos, n) {
-
-    var new_pos = pos;
-    var sel = '#register_'.concat(n.toString());
-    var r = $(sel);
-
-    // add registers as needed
-    if (r.length==0) {
-	extend_registers(n);
-	r = $(sel);
-    }
-
-    var data = r.val();
-    var i = data.search(/[1#]/);
-
-    if (i==-1) {
-	new_pos = transfer(p, pos, 1);
-    }
-    else {
-	if (data[i]=='1') {
-	    new_pos = transfer(p, pos, 2);
-	}
-	else {
-	    new_pos = transfer(p, pos, 3);
-	}
-    }
-    if (new_pos != pos) {
-	// pop left
-	if (i==-1) {
-	    r.val('');
-	}
-	else {
-	    r.val(r.val().slice(i+1));
-	}
-    }
-
-    return new_pos;
-};
-
-var append = function(c, n) {
-
-    var sel = '#register_'.concat(n.toString());
-    var r = $(sel);
-
-    // add registers as needed
-    if (r.length==0) {
-	extend_registers(n);
-	r = $(sel);
-    }
-
-    r.val(r.val().concat(c));
-};
-
-
-var step = function(p, pos) {
-    
-    var inst = ones_hashes(p, pos);
-    var n_ones = inst[0];
-    var n_hashes = inst[1];
-    var new_pos = inst[2];
-
-    // console.log(inst);
-    
-    if (n_ones==0 || n_hashes==0) {
-	return pos;
-    }
-    if (n_hashes==1) {
-	append('1', n_ones);
-	return new_pos;
-    }
-    if (n_hashes==2) {
-	append('#', n_ones);
-	return new_pos;
-    }
-    if (n_hashes==3) {
-	return transfer(p, pos, n_ones, false);
-    }
-    if (n_hashes==4) {
-	return transfer(p, pos, n_ones, true);
-    }
-    if (n_hashes==5) {
-	return cases(p, pos, n_ones);
-    }
-};  
-
-var eval_buttons_ready = function() {
+var eval_button_ready = function() {
 
     $('#interrupt').prop('disabled', true);
+    $('#interrupt').off('click');
     $('#evaluate').prop('disabled', false);
-    $('#evaluate_nonint').prop('disabled', false);
-    return;
-};
 
-// This `evaluate`, though faster, cannot be interrupted (easily)
-var evaluate_nonint = function() {
-
-    var p = $('#program').val();
-    var pos = 0;
-    var new_pos = 0;
-    
-    p = clean(p);
-    var parsed = parse(p);
-    var parser_pos = parsed[0];
-    if (parser_pos < p.length) {
-	console.log('1# syntax error');
-	return;
-    }
-    p = parsed[1]
-    
-    $('#interrupt').prop('disabled', true);
-    $('#evaluate').prop('disabled', true);
-    $('#evaluate_nonint').prop('disabled', true);
-
-    while (true) {
-        new_pos = step(p, pos);
-        if (new_pos==pos) {
-    	    eval_buttons_ready();
-            break;
-    	}
-    	pos = new_pos;
-    }
-
-    return;
-};
-
-var interrupt = function() {
-
-    clearInterval(eval_interval);
-    eval_buttons_ready();
     return;
 };
 
 var evaluate = function() {
 
-    p = $('#program').val();
-    pos = 0;
-    new_pos = 0;
-    
+    $('#evaluate').prop('disabled', true);
+    $('#interrupt').prop('disabled', false);
+
+    // Parse program
+    var p = $('#program').val();
     p = clean(p);
     var parsed = parse(p);
     var parser_pos = parsed[0];
@@ -348,30 +236,42 @@ var evaluate = function() {
     }
     p = parsed[1]
 
-    $('#interrupt').prop('disabled', false);
-    $('#evaluate').prop('disabled', true);
-    $('#evaluate_nonint').prop('disabled', true);
-    
-    eval_interval = setInterval( function() {
-        new_pos = step(p, pos);
-        if (new_pos==pos) {
-	    interrupt()
-	}
-	pos = new_pos;
-    }, 1);
+    // Move dom registers to array
+    var regs = [''];
+    regs = dom_regs_to_array(regs);
+
+    // Start worker and make kill button active
+    var thread = new Worker('jsonesharp-worker.js');
+    $('#interrupt').click(function() {
+	eval_button_ready();
+	thread.terminate();
+	return;
+    });
+    thread.onmessage = function(e) {
+
+	console.log('Halting at instruction '.concat(e.data[0].toString()));
+	array_to_dom_regs(e.data[1]);
+
+	eval_button_ready();
+
+	return;
+    };
+    thread.postMessage([p, regs]);
     
     return;
 };
 
+//
+// main
+//
+
 $(document).ready(function() {
 
-    eval_buttons_ready();
     extend_registers(1)
-    
+    eval_button_ready();
+
     $('#remove_register').click(remove_last_register)
     $('#add_register').click(add_one_register)
     $('#clear_program').click(clear_program);
     $('#evaluate').click(evaluate);
-    $('#evaluate_nonint').click(evaluate_nonint);
-    $('#interrupt').click(interrupt);
 });
