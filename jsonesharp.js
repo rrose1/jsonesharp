@@ -202,12 +202,19 @@ var eval_button_ready = function() {
     $('#interrupt').prop('disabled', true);
     $('#interrupt').off('click');
     $('#evaluate').prop('disabled', false);
+    $('#eval_slow').prop('disabled', false);
+};
+
+var eval_button_busy = function() {
+
+    $('#interrupt').prop('disabled', false);
+    $('#evaluate').prop('disabled', true);
+    $('#eval_slow').prop('disabled', true);
 };
 
 var evaluate = function() {
 
-    $('#evaluate').prop('disabled', true);
-    $('#interrupt').prop('disabled', false);
+    eval_button_busy();
 
     // Parse program
     var p = $('#program').val();
@@ -225,11 +232,11 @@ var evaluate = function() {
     regs = dom_regs_to_array(regs);
 
     // Start worker and make kill button active
-    var thread = new Worker('jsonesharp-worker.js');
+    var thread = new Worker('evaluate.js');
     $('#interrupt').click(function() {
 
-	eval_button_ready();
 	thread.terminate();
+	eval_button_ready();
     });
     thread.onmessage = function(e) {
 
@@ -238,6 +245,43 @@ var evaluate = function() {
 	eval_button_ready();
     };
     thread.postMessage([p, regs]);
+};
+
+var eval_slow = function() {
+    
+    eval_button_busy();
+
+    // Parse program
+    var p = $('#program').val();
+    p = clean(p);
+    var parsed = parse(p);
+    var parser_pos = parsed[0];
+    if (parser_pos < p.length) {
+	console.log('1# syntax error');
+	return;
+    }
+    p = parsed[1]
+
+    // Move dom registers to array
+    var regs = [[]];
+    regs = dom_regs_to_array(regs);
+
+    // Start worker and make kill button active
+    var thread = new Worker('eval-slow.js');
+    $('#interrupt').click(function() {
+
+	thread.terminate();
+	eval_button_ready();
+    });
+    thread.onmessage = function(e) {
+
+	if (e.data[2]) {
+	    console.log('Halting at instruction '.concat(e.data[0].toString()));
+	    eval_button_ready();
+	}
+	array_to_dom_regs(e.data[1]);
+    };
+    thread.postMessage([p, regs, 20]);
 };
 
 //
@@ -253,4 +297,5 @@ $(document).ready(function() {
     $('#add_register').click(add_one_register);
     $('#clear_program').click(clear_program);
     $('#evaluate').click(evaluate);
+    $('#eval_slow').click(eval_slow);
 });
