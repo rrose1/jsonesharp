@@ -1,16 +1,4 @@
 //
-//
-//
-
-var clear_program = function() {
-
-    $('#program').val('')
-
-    return;
-};
-
-
-//
 // DOM register management routines
 //
 
@@ -65,8 +53,6 @@ var update_register_buttons = function(m) {
     else {
 	$('#remove_register').prop("disabled", false);
     }
-
-    return;
 };
 
 var extend_registers = function(n) {
@@ -79,15 +65,11 @@ var extend_registers = function(n) {
     }
 
     update_register_buttons(m);
-
-    return;
 };
 
 var add_one_register = function() {
 
     extend_registers($('.register').length + 1);
-
-    return;
 };
 
 var remove_last_register = function() {
@@ -99,8 +81,6 @@ var remove_last_register = function() {
 	$(sel).remove();
 	update_register_buttons(m);
     }
-
-    return;
 };
 
 //
@@ -111,11 +91,13 @@ var remove_last_register = function() {
 var dom_regs_to_array = function() {
 
     var dom_regs = $('.register')
-    var regs = [''];
-    
+    var regs = [[]];
+
+    var id = '';
     var i = 0;
     while (i < dom_regs.length) {
-	regs.push($('#register_'.concat((i+1).toString())).val());
+	id = '#register_'.concat((i+1).toString());
+	regs.push($(id).val().split(''));
 	i++;
     }
     
@@ -136,13 +118,13 @@ var array_to_dom_regs = function(regs) {
 	extend_registers(regs.length-1);
     }
 
+    var id = '';
     var i = 1;
-    while (i <= regs.length) {
-	$('#register_'.concat(i.toString())).val(regs[i]);
+    while (i < regs.length) {
+	id = '#register_'.concat(i.toString()); 
+	$(id).val(regs[i].join(''));
 	i++;
     }
-    
-    return;
 };
 
 //
@@ -160,7 +142,6 @@ var clean = function(p) {
     p = p.replace(/[^1#]/g, '');
     
     return p;
-    
 };
 
 var parse_ones_hashes = function(p, pos) {
@@ -211,13 +192,16 @@ var parse = function(p) {
 // Button events and states
 //
 
+var clear_program = function() {
+
+    $('#program').val('')
+};
+
 var eval_button_ready = function() {
 
     $('#interrupt').prop('disabled', true);
     $('#interrupt').off('click');
     $('#evaluate').prop('disabled', false);
-
-    return;
 };
 
 var evaluate = function() {
@@ -237,28 +221,23 @@ var evaluate = function() {
     p = parsed[1]
 
     // Move dom registers to array
-    var regs = [''];
+    var regs = [[]];
     regs = dom_regs_to_array(regs);
 
     // Start worker and make kill button active
     var thread = new Worker('jsonesharp-worker.js');
     $('#interrupt').click(function() {
+
 	eval_button_ready();
 	thread.terminate();
-	return;
     });
     thread.onmessage = function(e) {
 
 	console.log('Halting at instruction '.concat(e.data[0].toString()));
 	array_to_dom_regs(e.data[1]);
-
 	eval_button_ready();
-
-	return;
     };
     thread.postMessage([p, regs]);
-    
-    return;
 };
 
 //
@@ -267,11 +246,11 @@ var evaluate = function() {
 
 $(document).ready(function() {
 
-    extend_registers(1)
+    extend_registers(1);
     eval_button_ready();
 
-    $('#remove_register').click(remove_last_register)
-    $('#add_register').click(add_one_register)
+    $('#remove_register').click(remove_last_register);
+    $('#add_register').click(add_one_register);
     $('#clear_program').click(clear_program);
     $('#evaluate').click(evaluate);
 });
