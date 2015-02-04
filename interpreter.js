@@ -24,6 +24,15 @@ var cases = function(p, pos, n, regs) {
     var c = '';
     var head = [];
     while (regs[n].length > 0 && c != '#' && c != '1') {
+	
+	// pops a comment from register
+	if (c==';') {
+	    while (regs[n].length > 0 && c != '\n'
+		   && c != '\f' && c != '\r') {
+		c = regs[n].shift();
+	    }
+	}
+	
 	c = regs[n].shift();
 	head.push(c)
     }
