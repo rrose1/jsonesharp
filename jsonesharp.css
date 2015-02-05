@@ -3,6 +3,10 @@ body {
     font-family: monospace;
 }
 
+#bottom_spacer{
+    height: 200px;
+}
+
 #clear_program {
     font-size: smaller;
 }

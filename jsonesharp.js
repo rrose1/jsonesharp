@@ -2,6 +2,13 @@
 // DOM register management routines
 //
 
+var resize_text_area = function(e) {
+
+    e.css('height', 'auto');
+    var h = (e.prop('scrollHeight') + 2).toString().concat('px');
+    e.css('height', h);
+};
+
 var new_register = function(n) {
 
     var id = 'register_'.concat(n.toString());
@@ -31,7 +38,11 @@ var new_register = function(n) {
     button.attr('type', 'button');
     button.attr('class', 'btn btn-default clear_register');
     button.html('clear');
-    button.click(function () { $( '#'.concat(id) ).val(''); });
+    button.click(function () {
+	var e = $('#'.concat(id)); 
+	e.val('');
+	resize_text_area(e);
+    });
     
     col2.append(textarea);
     col3.append(button);
@@ -120,9 +131,11 @@ var array_to_dom_regs = function(regs) {
 
     var id = '';
     var i = 1;
+    var h = 0;
     while (i < regs.length) {
 	id = '#register_'.concat(i.toString()); 
 	$(id).val(regs[i].join(''));
+	resize_text_area($(id));
 	i++;
     }
 };
