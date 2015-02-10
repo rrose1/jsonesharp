@@ -1,4 +1,35 @@
 //
+// status line
+//
+
+var status_text = function(text) {
+
+    $('#status').text(text);
+};
+
+var halting_message = function(n, p) {
+
+    //TODO: Look into more informative halting messages
+    if (n==0 && p.length > 0) {
+	status_text('halted improperly');
+    }
+    else {
+	status_text('halted properly');
+    }
+
+};
+
+var eval_message = function() {
+
+    status_text('evaluating program');
+};
+
+var interrupt_message = function() {
+
+    status_text('evaluation interrupted');
+};
+
+//
 // DOM register management routines
 //
 
@@ -157,7 +188,7 @@ var clean = function(p) {
     return p;
 };
 
-var parse_ones_hashes = function(p, pos) {
+var ones_hashes = function(p, pos) {
 
     var n_ones = 0;
     var n_hashes = 0;
@@ -185,7 +216,7 @@ var parse = function(p) {
 
     while (pos < p.length) {
 
-	inst = parse_ones_hashes(p, pos);
+	inst = ones_hashes(p, pos);
 	n_ones = inst[0];
 	n_hashes = inst[1];
 	new_pos = inst[2];
@@ -199,6 +230,19 @@ var parse = function(p) {
     }
     
     return [pos, parsed];
+};
+
+var parse_program = function() {
+
+    var p = $('#program').val();
+    p = clean(p);
+    var parsed = parse(p);
+    if (parsed[0] < p.length) {
+	status_text('syntax error');
+	eval_button_ready();
+	return [false, parsed[1]];
+    }
+    return [true, parsed[1]];
 };
 
 //
@@ -228,17 +272,16 @@ var eval_button_busy = function() {
 var evaluate = function() {
 
     eval_button_busy();
-
+    eval_message();
+    
     // Parse program
-    var p = $('#program').val();
-    p = clean(p);
-    var parsed = parse(p);
-    var parser_pos = parsed[0];
-    if (parser_pos < p.length) {
-	console.log('1# syntax error');
+    var parsed = parse_program();
+    if (parsed[0]) {
+	var p = parsed[1];
+    }
+    else {
 	return;
     }
-    p = parsed[1]
 
     // Move dom registers to array
     var regs = [[]];
@@ -249,11 +292,12 @@ var evaluate = function() {
     $('#interrupt').click(function() {
 
 	thread.terminate();
+	interrupt_message();
 	eval_button_ready();
     });
     thread.onmessage = function(e) {
 
-	console.log('Halting at instruction '.concat(e.data[0].toString()));
+	halting_message(e.data[0], p);
 	array_to_dom_regs(e.data[1]);
 	eval_button_ready();
     };
@@ -263,17 +307,16 @@ var evaluate = function() {
 var eval_slow = function() {
     
     eval_button_busy();
-
+    eval_message();
+    
     // Parse program
-    var p = $('#program').val();
-    p = clean(p);
-    var parsed = parse(p);
-    var parser_pos = parsed[0];
-    if (parser_pos < p.length) {
-	console.log('1# syntax error');
+    var parsed = parse_program();
+    if (parsed[0]) {
+	var p = parsed[1];
+    }
+    else {
 	return;
     }
-    p = parsed[1]
 
     // Move dom registers to array
     var regs = [[]];
@@ -284,12 +327,13 @@ var eval_slow = function() {
     $('#interrupt').click(function() {
 
 	thread.terminate();
+	interrupt_message();
 	eval_button_ready();
     });
     thread.onmessage = function(e) {
 
 	if (e.data[2]) {
-	    console.log('Halting at instruction '.concat(e.data[0].toString()));
+	    halting_message(e.data[0], p);
 	    eval_button_ready();
 	}
 	array_to_dom_regs(e.data[1]);
