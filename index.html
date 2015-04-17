@@ -10,60 +10,117 @@
     <link rel="stylesheet" href="jsonesharp.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="jquery.cookie.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="jsonesharp.js"></script>
     
   </head>
   
-  <body>
-    <div class="container">
+<body>
+<div class="container">
 
       <!-- Page header -->
       
-      <div class="page-header">
-	<h4>js1#:
-	  <small>
-	    <span id="status">a 1# interpreter for web browsers</span>
-	  </small>
-	</h4>
-      </div>
-
-      <!-- Register machine starts here -->
-      <div class="form-horizontal" id="rm">
-
-	<label for="program">program editor</label>
-	<div class="form-group">
-	  <div class="col-sm-10">
-	    <textarea class="form-control" rows="10" id="program"></textarea>
-	  </div>
-	  <div class="col-sm-2 row-sm-offset-1">
-	    <div class="btn-group-vertical" role="group" aria-label="...">
-	      <button type="button" class="btn btn-default" id="clear_program">
-		clear
-	      </button>
-	      <button type="button" class="btn btn-default" id="add_register"></button>
-	      <button type="button" class="btn btn-default" id="remove_register"></button>
-	      <button type="button" class="btn btn-default" id="evaluate">
-		evaluate
-	      </button>
-	      <button type="button" class="btn btn-default" id="eval_slow">
-		eval slow
-	      </button>
-	      <button type="button" class="btn btn-default" id="interrupt">
-		interrupt
-	      </button>	      
-	    </div>
-	  </div>
+	<div class="page-header">
+		<h4>js1#:
+		<small>
+		<span id="status">a 1# interpreter for web browsers</span>
+		</small>
+		</h4>
 	</div>
 
-	<!-- Registers to appear here -->
-	
-      </div>
-      <!-- Register machine ends here -->
-      
-    </div>
+	<div role="tabpanel">
 
-    <div id="bottom_spacer"></div>
+	  <!-- Feature tabs -->
+	  <ul class="nav nav-tabs" role="tablist">
+	    <li role="presentation" class="active" data-toggle="tooltip" title="e">
+	    	<a href="#rm" aria-controls="rm" role="tab" data-toggle="tab" id="editor-tab">
+	    		program editor
+	    	</a>
+	    </li>
+	    <li role="presentation" data-toggle="tooltip" title="w">
+	    	<a href="#workshop" aria-controls="workshop" role="tab" data-toggle="tab" id="workshop-tab">workshop</a>
+	    </li>
+	  </ul>
+
+	  <!-- Feature panes -->
+	  <div class="tab-content">
+  	      <!-- Register machine starts here -->
+		  	<div role="tabpanel" class="tab-pane active form-horizontal" id="rm">
+				<div class="form-group">
+				  <div class="col-sm-10">
+				    <textarea class="form-control" rows="10" tabindex="1" id="program"></textarea>
+				  </div>
+				  <div class="col-sm-2 row-sm-offset-1">
+				    <div class="btn-group-vertical" role="group" aria-label="...">
+				      <button type="button" class="btn btn-default rr-smalltext" 
+				      data-toggle="tooltip" title="c" id="clear_program">
+						clear
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="add_register"></button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="remove_register"></button>
+				      <button type="button" class="btn btn-default rr-smalltext" 
+				      data-toggle="tooltip" title="r" id="evaluate">
+						evaluate
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="eval_slow">
+						eval slow
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="interrupt">
+						interrupt
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="reference"
+				      data-toggle="popover" title="1#&nbsp;Syntax&nbsp;Reference"
+				      data-content="1<sup>n</sup>#: Add a 1 to Rn<br>
+				      1<sup>n</sup>##: Add a # to Rn<br>
+				      1<sup>n</sup>###: Back n instructions<br>
+				      1<sup>n</sup>####: Forward n instructions<br>
+				      1<sup>n</sup>#####: Cases on Rn<br><br>
+				      Additions are made on the right.<br><br>
+				      Cases destroys the leftmost symbol
+				      and: if empty, forward one instruction, if 1, forward two instructions,
+				      if #, forward three instructions.">
+			      		reference
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="save_as_new">
+				      	save as new
+				      </button>    
+				    </div>
+				  </div>
+				</div>
+
+			<!-- Registers to appear here -->
+			
+			</div>
+		      <!-- Register machine ends here -->
+		    <!-- Workshop starts here -->
+		    <div role="tabpanel" class="tab-pane" id="workshop">
+		    	<div role="tabpanel">
+		    		<div class="row">
+		    			<div class="col-sm-3">
+				    		<ul class="nav nav-tabs nav-stacked" role="tablist">
+				    		</ul>
+			    		</div>
+		    			<div class="col-sm-9">
+				    		<div class="tab-content">
+			    			</div>
+		    			</div>
+	    			</div>
+	    		</div>
+		    </div>
+		    <!-- Workshop ends here -->
+	  </div>
+
+	
+
+    </div>
+</div>
+
+<div id="bottom_spacer"></div>
     
   </body>
+  <script>
+  	$("#reference").popover({html: true, placement: "left", container: 'body'});
+  	$("[data-toggle='tooltip']").tooltip();
+  </script>
 </html>
