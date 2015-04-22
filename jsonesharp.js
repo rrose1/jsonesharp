@@ -398,6 +398,34 @@ var add_workshop_page = function(title, program_text, active, tabpanel_id) {
         new_button.tooltip();
         new_panel.append(new_button);
     }
+    else if (tabpanel_id == 'save-modal-panel') {
+        var new_button = $('<a>');
+        new_button.attr({'class': 'btn btn-primary save-over', 'type': 'button', 
+            'role': 'button'});
+        new_button.text('overwrite this');
+        new_button.click(function () {
+            var processed_text = $('#program').val();
+            processed_text = processed_text.replace(/#1/g, '# 1');
+
+            sudo_save_program(title, processed_text);
+            clear_std_tabs();
+            load_library_from_cookie();
+            //$(this).siblings('p.program-text').html(processed_text);
+            $('div.modal').modal('hide');
+        });
+        new_panel.append(new_button);
+    }
+    else if (tabpanel_id == 'open-modal-panel') {
+        var new_button = $('<a>');
+        new_button.attr({'class': 'btn btn-primary open', 'type': 'button', 
+            'role': 'button'});
+        new_button.text('open');
+        new_button.click(function () {
+            $('#program').val($(this).siblings('p.program-text').text());
+            $('div.modal').modal('hide');
+        });
+        new_panel.append(new_button);
+    }
 
     tab_content.append(new_panel);
 
@@ -425,8 +453,20 @@ var save_as_new = function() {
     var program_text = $('#program').val();
     title = add_workshop_page(title, program_text, false, "workshop");
     add_workshop_page(title, program_text, false, "save-modal-panel");
+    add_workshop_page(title, program_text, false, "open-modal-panel");
     sudo_save_program(title, program_text);
 };
+
+var clear_tabs = function(tabpanel_id) {
+    $("#" + tabpanel_id + " ul.nav-tabs").empty();
+    $("#" + tabpanel_id + " div.tab-content").empty();
+}
+
+var clear_std_tabs = function() {
+    clear_tabs('workshop');
+    clear_tabs('save-modal-panel');
+    clear_tabs('open-modal-panel');
+}
 
 var load_library_from_cookie = function () {
     replenish_std_lib();
@@ -438,6 +478,7 @@ var load_library_from_cookie = function () {
         if (saved_programs.hasOwnProperty(title)) {
             add_workshop_page(title, saved_programs[title], first, "workshop");
             add_workshop_page(title, saved_programs[title], first, "save-modal-panel");
+            add_workshop_page(title, saved_programs[title], first, "open-modal-panel");
             first = false;
         }
     }
@@ -462,7 +503,17 @@ $(document).ready(function() {
     $('#evaluate').click(evaluate);
     $('#eval_slow').click(eval_slow);
     $('a.wk-pload').click(load_program);
-    $('#save_as_new').click(save_as_new);
+    $('#save_as_new').click(function () {
+        $('#save-modal').modal('show');
+    });
+    $('#open').click(function () {
+        $('#open-modal').modal('show');
+    });
+    $('#save_new_btn').click( function() {
+        sudo_save_program($('#save_new_title').val(), $('#program').val());
+        load_library_from_cookie();
+        $('div.modal').modal('hide');
+    });
 
     // keyboard inputs
     $('body').keypress(function(e) {
@@ -471,7 +522,7 @@ $(document).ready(function() {
             $('*').blur();
         }
 
-        // intercept keyboard inputs only if not in a text area
+        // intercept other keyboard inputs only if not in a text area
         if (!$('input,textarea').is(':focus')) {
             if (e.which == 63) { // '?'
                 $("#help-modal").modal('show');
@@ -484,6 +535,9 @@ $(document).ready(function() {
                 }
                 if (e.which == 115) { // 's'
                     $('#save-modal').modal('show');
+                }
+                if (e.which == 111) {
+                    $('#open-modal').modal('show');
                 }
                 if (e.which == 99) { // 'c'
                     $('#clear_program').click();
