@@ -511,6 +511,7 @@ $(document).ready(function() {
     });
     $('#save_new_btn').click( function() {
         sudo_save_program($('#save_new_title').val(), $('#program').val());
+        clear_std_tabs();
         load_library_from_cookie();
         $('div.modal').modal('hide');
     });
