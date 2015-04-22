@@ -350,14 +350,14 @@ var load_program = function() {
     $("#editor-tab").click();
 };
 
-var add_workshop_page = function(title, program_text, active) {
+var add_workshop_page = function(title, program_text, active, tabpanel_id) {
     // find the workshop's stacked nav
-    var ul = $("#workshop ul.nav-tabs");
+    var ul = $("#" + tabpanel_id + " ul.nav-tabs");
     var num_page = ul.children().size() + 1;
 
     // find a title
     if (title == null) title = "program " + num_page.toString();
-    var id = 'wk-tab-p' + num_page.toString();
+    var id = tabpanel_id + '-p' + num_page.toString();
 
     // format the program text
     program_text = program_text.replace(/(?:\r\n|\r|\n)/g, '\n<br>');
@@ -378,7 +378,7 @@ var add_workshop_page = function(title, program_text, active) {
     ul.append(new_li);
 
     // add a new div with the program text and a load button
-    var tab_content = $("#workshop div.tab-content");
+    var tab_content = $("#" + tabpanel_id + " div.tab-content");
 
     var new_panel = $('<div>');
     new_panel.attr({'role': 'tabpanel', 'class': 'tab-pane', 'id': id});
@@ -387,16 +387,18 @@ var add_workshop_page = function(title, program_text, active) {
     var new_p = $('<p>');
     new_p.attr('class', 'program-text');
     new_p.html(program_text);
-
-    var new_button = $('<a>');
-    new_button.attr({'class': 'btn btn-primary wk-pload', 'type': 'button', 
-        'role': 'button', 'data-toggle': 'tooltip', 'title': 'l'});
-    new_button.text('load into editor');
-    new_button.click(load_program);
-    new_button.tooltip();
-
     new_panel.append(new_p);
-    new_panel.append(new_button);
+
+    if (tabpanel_id == 'workshop') {
+        var new_button = $('<a>');
+        new_button.attr({'class': 'btn btn-primary wk-pload', 'type': 'button', 
+            'role': 'button', 'data-toggle': 'tooltip', 'title': 'l'});
+        new_button.text('load into editor');
+        new_button.click(load_program);
+        new_button.tooltip();
+        new_panel.append(new_button);
+    }
+
     tab_content.append(new_panel);
 
     return title;
@@ -421,7 +423,8 @@ var replenish_std_lib = function() {
 var save_as_new = function() {
     var title = null;
     var program_text = $('#program').val();
-    title = add_workshop_page(title, program_text, false);
+    title = add_workshop_page(title, program_text, false, "workshop");
+    add_workshop_page(title, program_text, false, "save-modal-panel");
     sudo_save_program(title, program_text);
 };
 
@@ -433,7 +436,8 @@ var load_library_from_cookie = function () {
     var first = true;
     for (var title in saved_programs) {
         if (saved_programs.hasOwnProperty(title)) {
-            add_workshop_page(title, saved_programs[title], first);
+            add_workshop_page(title, saved_programs[title], first, "workshop");
+            add_workshop_page(title, saved_programs[title], first, "save-modal-panel");
             first = false;
         }
     }
@@ -462,14 +466,24 @@ $(document).ready(function() {
 
     // keyboard inputs
     $('body').keypress(function(e) {
-        if (e.keyCode == 27) $('*').blur();
+        if (e.keyCode == 27) {
+            $('div.modal').modal('hide');
+            $('*').blur();
+        }
 
         // intercept keyboard inputs only if not in a text area
         if (!$('input,textarea').is(':focus')) {
+            if (e.which == 63) { // '?'
+                $("#help-modal").modal('show');
+            }
+
             // these shortcuts are available for editor tab only
             if ($("li[class=active] > #editor-tab").length) {
                 if (e.which == 114) { // 'r'
                     $('#evaluate').click();
+                }
+                if (e.which == 115) { // 's'
+                    $('#save-modal').modal('show');
                 }
                 if (e.which == 99) { // 'c'
                     $('#clear_program').click();
