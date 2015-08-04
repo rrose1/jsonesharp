@@ -1,9 +1,19 @@
-js1# is a browser-based implementation of the 1# text register machine used in Larry Moss's recursion theory classes: http://www.indiana.edu/~iulg/trm/
+## Overview
 
-You can try it here: http://rrose1.github.io/jsonesharp/
+js1# is a browser-based implementation of the [1# text register
+machine](http://www.indiana.edu/~iulg/trm/) used in Larry Moss's recursion
+theory classes. The 1# interpreter is written in Javascript (with
+jQuery/Bootstrap) and runs locally, so the whole package can work without
+connectivity. The goal is simply to build an accessible and easy-to-use tool for
+students working on the exercises that involve writing 1# programs.
 
-The 1# interpreter is written in Javascript (with jQuery) and runs locally in the browser. The web interface is in Bootstrap. js1# could be packaged with these libraries and run without a web server or internet connection.
+You can try my build [here](http://dasprunger.github.io/jsonesharp/), but also
+check out @rrose1, who made it originally.
 
-This is currently the result of an evening of hacking by someone who is not at all a web programmer or language implementer. The goal was simply to build an accessible and easy-to-use tool for students working on the exercises that involve writing 1# programs.
+## How to contribute
 
-I invite other students to improve this thing. (Maybe look at it as giving something back to the course.) Even if you're not inclined to work on the code, please feel free to write about bugs, areas for improvement and desirable new features in the issue tracker: https://github.com/rrose1/jsonesharp/issues
+Anyone is encouraged to contribute and improve this thing. (Especially students
+in the recursion theory course...maybe look at it as giving something back.)
+Even if you're not inclined to work on the code, please feel free to write about
+bugs, areas for improvement and desirable new features in the [issue
+tracker](https://github.com/dasprunger/jsonesharp/issues).

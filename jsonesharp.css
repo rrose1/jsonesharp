@@ -7,30 +7,17 @@ body {
     height: 200px;
 }
 
-#clear_program {
+button.rr-smalltext {
     font-size: smaller;
 }
-
 .clear_register {
     font-size: smaller;
 }
 
-#evaluate {
-    font-size: smaller;
+ul.nav-tabs > li > a {
+    color: rgb(51, 51, 51);
 }
 
-#eval_slow {
-    font-size: smaller;
-}
+ul.nav-tabs { border-bottom: none; }
 
-#interrupt {
-    font-size: smaller;
-}
-
-#add_register {
-    font-size: smaller;
-}
-
-#remove_register {
-    font-size: smaller;
-}
+textarea.register { min-height: 49px; }

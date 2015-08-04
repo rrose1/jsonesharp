@@ -7,8 +7,8 @@ var extend_regs = function(regs, n) {
     var m = regs.length;
     
     while (m <= n) {
-	regs.push([]);
-	m++;
+    	regs.push([]);
+    	m++;
     }
 };
 
@@ -59,7 +59,7 @@ var cases = function(p, pos, n, regs) {
 var step = function(p, pos, regs) {
 
     if (pos==p.length) {
-	return pos;
+	   return pos;
     }
 
     var n_ones = p[pos][0];
@@ -67,22 +67,22 @@ var step = function(p, pos, regs) {
     var new_pos = transfer(p, pos, 1);
     
     if (n_hashes==1) {
-	extend_regs(regs, n_ones);
-	regs[n_ones].push('1');
+    	extend_regs(regs, n_ones);
+    	regs[n_ones].push('1');
     }
     else if (n_hashes==2) {
-	extend_regs(regs, n_ones);
-	regs[n_ones].push('#');
+    	extend_regs(regs, n_ones);
+    	regs[n_ones].push('#');
     }
     else if (n_hashes==3) {
-	new_pos = transfer(p, pos, n_ones);
+	   new_pos = transfer(p, pos, n_ones);
     }
     else if (n_hashes==4) {
-	new_pos = n_ones > pos ? pos : pos - n_ones;
+	   new_pos = n_ones > pos ? pos : pos - n_ones;
     }
     else {
-	extend_regs(regs, n_ones);
-	new_pos = cases(p, pos, n_ones, regs);
+    	extend_regs(regs, n_ones);
+    	new_pos = cases(p, pos, n_ones, regs);
     }
     return new_pos;
 };  
@@ -93,7 +93,7 @@ var onesharp = function(p, regs) {
     var new_pos = 0;
 
     while (new_pos != pos) {
-	pos = new_pos;
+        pos = new_pos;
         new_pos = step(p, pos, regs);
     }
 
