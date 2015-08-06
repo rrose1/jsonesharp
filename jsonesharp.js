@@ -1,5 +1,3 @@
-var _SAVED_PROGRAMS_COOKIE = 'os-saved-programs';
-
 //
 // status line
 //
@@ -177,64 +175,6 @@ var array_to_dom_regs = function(regs) {
 //
 // Program preprocessing routines
 //
-
-var clean = function(p) {
-
-    // This should remove comments starting with a semi-colon and
-    // ending at a line break or at the end of p
-    p = p.replace(/;[^\n\f\r]*[\n\f\r]/g, '');
-    p = p.replace(/;.*$/, '');
-
-    // This should remove everything that is not a 1 or a #
-    p = p.replace(/[^1#]/g, '');
-    
-    return p;
-};
-
-var ones_hashes = function(p, pos) {
-
-    var n_ones = 0;
-    var n_hashes = 0;
-
-    while (pos < p.length && p[pos]=='1') {
-        n_ones++;
-        pos++;
-    }
-    while (pos < p.length && p[pos]=='#' && n_hashes < 5) {
-        n_hashes++;
-        pos++;
-    }
-
-    return [n_ones, n_hashes, pos]
-};
-
-var parse = function(p) {
-
-    var parsed = [];
-    var inst = [0, 0, 0];
-    var n_ones = 0;
-    var n_hashes = 0;
-    var pos = 0
-    var new_pos = 0;
-
-    while (pos < p.length) {
-
-    	inst = ones_hashes(p, pos);
-    	n_ones = inst[0];
-    	n_hashes = inst[1];
-    	new_pos = inst[2];
-    	
-    	if (n_ones==0 || n_hashes==0) {
-    	    break;
-    	}
-    	
-    	parsed.push([n_ones, n_hashes]);
-    	pos = new_pos;
-    }
-    
-    return [pos, parsed];
-};
-
 var parse_program = function() {
 
     var p = $('#program').val();
@@ -407,7 +347,7 @@ var add_workshop_page = function(title, program_text, active, tabpanel_id) {
             var processed_text = $('#program').val();
             processed_text = processed_text.replace(/#1/g, '# 1');
 
-            sudo_save_program(title, processed_text);
+            sudo_set_program(title, processed_text);
             clear_std_tabs();
             load_library_from_cookie();
             //$(this).siblings('p.program-text').html(processed_text);
@@ -432,20 +372,9 @@ var add_workshop_page = function(title, program_text, active, tabpanel_id) {
     return title;
 };
 
-var sudo_save_program = function (title, program_text) {
-    if ($.cookie(_SAVED_PROGRAMS_COOKIE)) {
-        var saved_programs = JSON.parse($.cookie(_SAVED_PROGRAMS_COOKIE));
-        saved_programs[title] = program_text;
-    }
-    else {
-        saved_programs = {};
-    }
-    $.cookie(_SAVED_PROGRAMS_COOKIE, JSON.stringify(saved_programs), 365);
-};
-
 var replenish_std_lib = function() {
-    sudo_save_program("clear 1", "; clear 1\n1##### 111### 11#### 111####");
-    sudo_save_program("pop 1", "; pop 1\n1##### 1### 1###");
+    sudo_set_program("clear 1", "; clear 1\n1##### 111### 11#### 111####");
+    sudo_set_program("pop 1", "; pop 1\n1##### 1### 1###");
 }
 
 var save_as_new = function() {
@@ -454,7 +383,7 @@ var save_as_new = function() {
     title = add_workshop_page(title, program_text, false, "workshop");
     add_workshop_page(title, program_text, false, "save-modal-panel");
     add_workshop_page(title, program_text, false, "open-modal-panel");
-    sudo_save_program(title, program_text);
+    sudo_set_program(title, program_text);
 };
 
 var clear_tabs = function(tabpanel_id) {
@@ -470,17 +399,15 @@ var clear_std_tabs = function() {
 
 var load_library_from_cookie = function () {
     replenish_std_lib();
-    var saved_programs = JSON.parse($.cookie(_SAVED_PROGRAMS_COOKIE));
-    if (!saved_programs) saved_programs = {};
 
+    var program_titles = get_titles();
     var first = true;
-    for (var title in saved_programs) {
-        if (saved_programs.hasOwnProperty(title)) {
-            add_workshop_page(title, saved_programs[title], first, "workshop");
-            add_workshop_page(title, saved_programs[title], first, "save-modal-panel");
-            add_workshop_page(title, saved_programs[title], first, "open-modal-panel");
-            first = false;
-        }
+    for (var i = 0; i < program_titles.length; i++) {
+        var program_vernacular = get_vernacular(program_titles[i]);
+        add_workshop_page(program_titles[i], program_vernacular, first, "workshop");
+        add_workshop_page(program_titles[i], program_vernacular, first, "save-modal-panel");
+        add_workshop_page(program_titles[i], program_vernacular, first, "open-modal-panel");
+        first = false;
     }
 };
 
@@ -510,7 +437,7 @@ $(document).ready(function() {
         $('#open-modal').modal('show');
     });
     $('#save_new_btn').click( function() {
-        sudo_save_program($('#save_new_title').val(), $('#program').val());
+        sudo_set_program($('#save_new_title').val(), $('#program').val());
         clear_std_tabs();
         load_library_from_cookie();
         $('div.modal').modal('hide');
