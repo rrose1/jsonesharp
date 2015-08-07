@@ -7,8 +7,7 @@ jQuery/Bootstrap) and runs locally, so the whole package can work without
 connectivity. The goal is simply to build an accessible and easy-to-use tool for
 students working on the exercises that involve writing 1# programs.
 
-You can try my build [here](http://dasprunger.github.io/jsonesharp/), but also
-check out @rrose1, who made it originally.
+You can try the build [here](http://rrose1.github.io/jsonesharp/).
 
 ## How to contribute
 
