@@ -6,7 +6,11 @@ var _SAVED_PROGRAMS_COOKIE = 'os-saved-programs';
 // 
 
 var is_pure_onesharp = function(vernacular_text) {
-	return vernacular_text.match(/^[1#\s]*$/) != null;
+	var parsed = vernacular_parse(vernacular_text);
+	for (var i = 0; i < parsed.length; i++) {
+		if (parsed[i][0] !== parseInt(parsed[i][0],10)) return false;
+	}
+	return true;
 }
 
 var find_mentions = function(vernacular_text) {
@@ -134,8 +138,17 @@ var sudo_set_program = function (title, vernacular_text) {
     	saved_programs[title] = [vernacular_text, vernacular_text];
     }
     else {
+    	// keep old version for later
+    	var old = saved_programs[title];
+
     	// compile vernacular text and save it
-    	saved_programs[title] = [vernacular_text, ""];
+    	var compiled = vernacular_compile(vernacular_text);
+    	saved_programs[title] = [vernacular_text, parsed_to_string(compiled)];
+    	var cycle_check = cycle_detect();
+    	if (!cycle_check[0]) {
+    		console.log("Dependency cycle detected, cannot save.");
+    		saved_programs[title] = old;
+    	}
     }
     $.cookie(_SAVED_PROGRAMS_COOKIE, JSON.stringify(saved_programs), 365);
 };

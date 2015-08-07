@@ -218,13 +218,13 @@ var evaluate = function() {
     eval_message();
     
     // Parse program
-    var parsed = parse_program();
-    if (parsed[0]) {
-    	var p = parsed[1];
-    }
-    else {
-	   return;
-    }
+    var p = vernacular_compile($('#program').val());
+    // if (parsed[0]) {
+    // 	var p = parsed[1];
+    // }
+    // else {
+	   // return;
+    // }
 
     // Move dom registers to array
     var regs = [[]];
@@ -233,7 +233,6 @@ var evaluate = function() {
     // Start worker and make kill button active
     var thread = new Worker('evaluate.js');
     $('#interrupt').click(function() {
-
     	thread.terminate();
     	interrupt_message();
     	eval_button_ready();
@@ -373,8 +372,12 @@ var add_workshop_page = function(title, program_text, active, tabpanel_id) {
 };
 
 var replenish_std_lib = function() {
-    sudo_set_program("clear 1", "; clear 1\n1##### 111### 11#### 111####");
-    sudo_set_program("pop 1", "; pop 1\n1##### 1### 1###");
+    sudo_set_program("clear1", "; clear 1\n1##### 111### 11#### 111####");
+    sudo_set_program("pop1", "; pop 1\n1##### 1### 1###");
+    sudo_set_program("copy123", "; copy 2 <- 1 using 3\n1##### 11111111### 1111### 11## 111## 11111#### 11# 111# 11111111#### 111##### 111111### 111### 1## 1111#### 1# 111111####");
+    sudo_set_program("write", "; write\n1##### 111111111### 11111### 11# 11## 11## 111111#### 11# 11##\n111111111#### 11### ## 111111### 111### 1## 1111#### 1# 111111####");
+    sudo_set_program("writelastclear", "; write last clear\n1## 1## 1## 1## 1## 1# 1# 1# 1## 1## 1## 1# 1# 1## 1## 1## 1## 1# 1# 1# 1## 1## 1## 1##");
+    sudo_set_program("metaclear", "; metaclear\nimport copy123\nimport clear1\nlabel start\n11##### ; cases 2\ngoto end ; blank => goto end\n1### ; 1 => next instruction\n1# ; # => write a 1\ngoto start\nlabel end\nimport writelastclear");
 }
 
 var save_as_new = function() {

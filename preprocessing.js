@@ -120,6 +120,102 @@ var vernacular_parse = function (vernacular_text) {
     return ret;
 };
 
+//
+// Vernacular compile replaces vernacular commands with equivalent 1# statements.
+//
+var vernacular_compile = function(vernacular_text) {
+    var parsed = vernacular_parse(vernacular_text);
+
+    // first pass takes import and eval statments and expands them.
+    for (var i = 0; i < parsed.length; i++) {
+        if (parsed[i][0] == 'import') {
+            var program = get_onesharp(parsed[i][1]);
+
+            var insert = vernacular_parse(program);
+            var new_parsed = parsed.slice(0, i).concat(insert).concat(parsed.slice(i+1));
+            parsed = new_parsed;
+            i += insert.length - 1;
+        }
+        else if (parsed[i][0] == 'eval') {
+            // first we have to possibly look up arguments in the library
+            var arguments = [];
+            for (var j = 0; j < parsed[i][1].length; j++) {
+                if ($.inArray(parsed[i][1][j], get_titles()) != -1) {
+                    var add = get_onesharp(parsed[i][1][j]);
+                }
+                else {
+                    add = parsed[i][1][j];
+                }
+                if (j == 0) arguments.push(add);
+                else arguments.push(add.split(''));
+            }
+            // then we run the program on its arguments
+            program = vernacular_parse(arguments[0]);
+            arguments[0] = "";
+            var result = onesharp(program, arguments);
+            var insert = vernacular_parse(arguments[1].join(''));
+            var new_parsed = parsed.slice(0, i).concat(insert).concat(parsed.slice(i+1));
+            parsed = new_parsed;
+            i += insert.length - 1;
+        }
+    }
+    // second pass removes label statements, recording the label's position in
+    // a temporary dictionary.
+    var label_dictionary = {};
+    for (var i = 0; i < parsed.length; i++) {
+        if (parsed[i][0] == 'label') {
+            label_dictionary[parsed[i][1]] = i;
+            parsed.splice(i, 1);
+            i--;
+        }
+    }
+
+    // third pass replaces goto statements with appropriate jump commands
+    for (var i = 0; i < parsed.length; i++) {
+        if (parsed[i][0] == 'goto') {
+            if (label_dictionary.hasOwnProperty(parsed[i][1])) {
+                var label_index = label_dictionary[parsed[i][1]];
+                var offset = label_index - i;
+                if (offset < 0) {
+                    parsed[i][0] = -offset;
+                    parsed[i][1] = 4;
+                }
+                else if (offset == 0) {
+                    parsed[i][0] = 1;
+                    parsed[i][1] = 4;
+                }
+                else {
+                    parsed[i][0] = offset;
+                    parsed[i][1] = 3;
+                }
+            }
+            
+        }
+    }
+
+    return parsed;
+}
+
+var parsed_to_string = function(parsed_output) {
+    var ret = "";
+    for (var i = 0; i < parsed_output.length; i++) {
+        var cmd = parsed_output[i][0];
+        if (cmd === parseInt(cmd, 10)) {
+            ret += "1".repeat(cmd) + "#".repeat(parsed_output[i][1]) + " ";
+        }
+        else {
+            if (ret[ret.length-1] == " ") ret += '\n';
+            if (cmd == 'eval') {
+                ret += 'eval ' + " ".join(parsed_output[i][1]) + '\n';
+            }
+            else if (cmd == 'import') {
+                ret += 'import ' + parsed_output[i][1] + '\n';
+            }
+        }
+    }
+    return ret;
+}
+
 
 //
 // Module testing
@@ -145,6 +241,15 @@ var test_vernacular_parse = function (test_name, test_input, expected_result) {
     }
 };
 
+String.prototype.repeat = function(count) {
+    if (count < 1) return '';
+    var result = '', pattern = this.valueOf();
+    while (count > 1) {
+        if (count & 1) result += pattern;
+        count >>= 1, pattern += pattern;
+    }
+    return result + pattern;
+};
 
 var array_equality = function(array1, array2) {
     if (array1 === array2) return true;
