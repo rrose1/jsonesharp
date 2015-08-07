@@ -11,10 +11,10 @@ var halting_message = function(n, p) {
 
     //TODO: Look into more informative halting messages
     if (n==0 && p.length > 0) {
-	status_text('halted improperly');
+	   status_text('halted improperly');
     }
     else {
-	status_text('halted properly');
+	   status_text('halted properly');
     }
 
 };
@@ -59,6 +59,7 @@ var new_register = function(n) {
     textarea.attr('class', 'form-control register');
     textarea.attr('rows', '1');
     textarea.attr('id', id);
+    textarea.attr('tabindex', n + 1);
     
     var label = $('<label>');
     label.attr('class', 'control_label col-sm-1');
@@ -102,8 +103,8 @@ var extend_registers = function(n) {
     var m = $('.register').length + 1;
 
     while (m <= n) {
-	$('#rm').append(new_register(m));
-	m++;
+    	$('#rm').append(new_register(m));
+    	m++;
     }
 
     update_register_buttons(m);
@@ -138,9 +139,9 @@ var dom_regs_to_array = function() {
     var id = '';
     var i = 0;
     while (i < dom_regs.length) {
-	id = '#register_'.concat((i+1).toString());
-	regs.push($(id).val().split(''));
-	i++;
+    	id = '#register_'.concat((i+1).toString());
+    	regs.push($(id).val().split(''));
+    	i++;
     }
     
     return regs;
@@ -151,13 +152,13 @@ var array_to_dom_regs = function(regs) {
     var m = $('.registers').length
     
     if (regs.length < m) {
-	while (regs.length < m) {
-	    remove_last_register();
-	    m--;
-	}
+    	while (regs.length < m) {
+    	    remove_last_register();
+    	    m--;
+    	}
     }
     else {
-	extend_registers(regs.length-1);
+	   extend_registers(regs.length-1);
     }
 
     var id = '';
@@ -174,73 +175,15 @@ var array_to_dom_regs = function(regs) {
 //
 // Program preprocessing routines
 //
-
-var clean = function(p) {
-
-    // This should remove comments starting with a semi-colon and
-    // ending at a line break or at the end of p
-    p = p.replace(/;[^\n\f\r]*[\n\f\r]/g, '');
-    p = p.replace(/;.*$/, '');
-
-    // This should remove everything that is not a 1 or a #
-    p = p.replace(/[^1#]/g, '');
-    
-    return p;
-};
-
-var ones_hashes = function(p, pos) {
-
-    var n_ones = 0;
-    var n_hashes = 0;
-
-    while (pos < p.length && p[pos]=='1') {
-        n_ones++;
-        pos++;
-    }
-    while (pos < p.length && p[pos]=='#' && n_hashes < 5) {
-        n_hashes++;
-        pos++;
-    }
-
-    return [n_ones, n_hashes, pos]
-};
-
-var parse = function(p) {
-
-    var parsed = [];
-    var inst = [0, 0, 0];
-    var n_ones = 0;
-    var n_hashes = 0;
-    var pos = 0
-    var new_pos = 0;
-
-    while (pos < p.length) {
-
-	inst = ones_hashes(p, pos);
-	n_ones = inst[0];
-	n_hashes = inst[1];
-	new_pos = inst[2];
-	
-	if (n_ones==0 || n_hashes==0) {
-	    break;
-	}
-	
-	parsed.push([n_ones, n_hashes]);
-	pos = new_pos;
-    }
-    
-    return [pos, parsed];
-};
-
 var parse_program = function() {
 
     var p = $('#program').val();
     p = clean(p);
     var parsed = parse(p);
     if (parsed[0] < p.length) {
-	status_text('syntax error');
-	eval_button_ready();
-	return [false, parsed[1]];
+    	status_text('syntax error');
+    	eval_button_ready();
+    	return [false, parsed[1]];
     }
     return [true, parsed[1]];
 };
@@ -275,13 +218,13 @@ var evaluate = function() {
     eval_message();
     
     // Parse program
-    var parsed = parse_program();
-    if (parsed[0]) {
-	var p = parsed[1];
-    }
-    else {
-	return;
-    }
+    var p = vernacular_compile($('#program').val());
+    // if (parsed[0]) {
+    // 	var p = parsed[1];
+    // }
+    // else {
+	   // return;
+    // }
 
     // Move dom registers to array
     var regs = [[]];
@@ -290,16 +233,15 @@ var evaluate = function() {
     // Start worker and make kill button active
     var thread = new Worker('evaluate.js');
     $('#interrupt').click(function() {
-
-	thread.terminate();
-	interrupt_message();
-	eval_button_ready();
+    	thread.terminate();
+    	interrupt_message();
+    	eval_button_ready();
     });
     thread.onmessage = function(e) {
 
-	halting_message(e.data[0], p);
-	array_to_dom_regs(e.data[1]);
-	eval_button_ready();
+    	halting_message(e.data[0], p);
+    	array_to_dom_regs(e.data[1]);
+    	eval_button_ready();
     };
     thread.postMessage([p, regs]);
 };
@@ -312,10 +254,10 @@ var eval_slow = function() {
     // Parse program
     var parsed = parse_program();
     if (parsed[0]) {
-	var p = parsed[1];
+    	var p = parsed[1];
     }
     else {
-	return;
+	   return;
     }
 
     // Move dom registers to array
@@ -326,19 +268,150 @@ var eval_slow = function() {
     var thread = new Worker('eval-slow.js');
     $('#interrupt').click(function() {
 
-	thread.terminate();
-	interrupt_message();
-	eval_button_ready();
+    	thread.terminate();
+    	interrupt_message();
+    	eval_button_ready();
     });
     thread.onmessage = function(e) {
 
-	if (e.data[2]) {
-	    halting_message(e.data[0], p);
-	    eval_button_ready();
-	}
-	array_to_dom_regs(e.data[1]);
+    	if (e.data[2]) {
+    	    halting_message(e.data[0], p);
+    	    eval_button_ready();
+    	}
+    	array_to_dom_regs(e.data[1]);
     };
     thread.postMessage([p, regs, 20]);
+};
+
+var load_program = function() {
+    var text = $(this).siblings("p.program-text").text().trim();
+    $("#program").val(text);
+    $("#editor-tab").click();
+};
+
+var add_workshop_page = function(title, program_text, active, tabpanel_id) {
+    // find the workshop's stacked nav
+    var ul = $("#" + tabpanel_id + " ul.nav-tabs");
+    var num_page = ul.children().size() + 1;
+
+    // find a title
+    if (title == null) title = "program " + num_page.toString();
+    var id = tabpanel_id + '-p' + num_page.toString();
+
+    // format the program text
+    program_text = program_text.replace(/(?:\r\n|\r|\n)/g, '\n<br>');
+    program_text = program_text.replace(/#1/g, '# 1');
+
+    // make a new li to add to the navigation
+    var new_li = $('<li>');
+    new_li.attr('role', 'presentation');
+    if (active) new_li.attr('class', 'active');
+
+    var new_tab = $('<a>');
+    new_tab.attr('href', '#' + id);
+    new_tab.attr('role', 'tab');
+    new_tab.attr('data-toggle', 'tab');
+    new_tab.text(title);
+
+    new_li.append(new_tab);
+    ul.append(new_li);
+
+    // add a new div with the program text and a load button
+    var tab_content = $("#" + tabpanel_id + " div.tab-content");
+
+    var new_panel = $('<div>');
+    new_panel.attr({'role': 'tabpanel', 'class': 'tab-pane', 'id': id});
+    if (active) new_panel.attr('class', 'tab-pane active');
+
+    var new_p = $('<p>');
+    new_p.attr('class', 'program-text');
+    new_p.html(program_text);
+    new_panel.append(new_p);
+
+    if (tabpanel_id == 'workshop') {
+        var new_button = $('<a>');
+        new_button.attr({'class': 'btn btn-primary wk-pload', 'type': 'button', 
+            'role': 'button', 'data-toggle': 'tooltip', 'title': 'l'});
+        new_button.text('load into editor');
+        new_button.click(load_program);
+        new_button.tooltip();
+        new_panel.append(new_button);
+    }
+    else if (tabpanel_id == 'save-modal-panel') {
+        var new_button = $('<a>');
+        new_button.attr({'class': 'btn btn-primary save-over', 'type': 'button', 
+            'role': 'button'});
+        new_button.text('overwrite this');
+        new_button.click(function () {
+            var processed_text = $('#program').val();
+            processed_text = processed_text.replace(/#1/g, '# 1');
+
+            sudo_set_program(title, processed_text);
+            clear_std_tabs();
+            load_library_from_cookie();
+            //$(this).siblings('p.program-text').html(processed_text);
+            $('div.modal').modal('hide');
+        });
+        new_panel.append(new_button);
+    }
+    else if (tabpanel_id == 'open-modal-panel') {
+        var new_button = $('<a>');
+        new_button.attr({'class': 'btn btn-primary open', 'type': 'button', 
+            'role': 'button'});
+        new_button.text('open');
+        new_button.click(function () {
+            $('#program').val($(this).siblings('p.program-text').text());
+            $('div.modal').modal('hide');
+        });
+        new_panel.append(new_button);
+    }
+
+    tab_content.append(new_panel);
+
+    return title;
+};
+
+var replenish_std_lib = function() {
+    sudo_set_program("clear1", "; clear 1\n1##### 111### 11#### 111####");
+    sudo_set_program("pop1", "; pop 1\n1##### 1### 1###");
+    sudo_set_program("copy123", "; copy 2 <- 1 using 3\n1##### 11111111### 1111### 11## 111## 11111#### 11# 111# 11111111#### 111##### 111111### 111### 1## 1111#### 1# 111111####");
+    sudo_set_program("write", "; write\n1##### 111111111### 11111### 11# 11## 11## 111111#### 11# 11##\n111111111#### 11### ## 111111### 111### 1## 1111#### 1# 111111####");
+    sudo_set_program("writelastclear", "; write last clear\n1## 1## 1## 1## 1## 1# 1# 1# 1## 1## 1## 1# 1# 1## 1## 1## 1## 1# 1# 1# 1## 1## 1## 1##");
+    sudo_set_program("metaclear", "; metaclear\nimport copy123\nimport clear1\nlabel start\n11##### ; cases 2\ngoto end ; blank => goto end\n1### ; 1 => next instruction\n1# ; # => write a 1\ngoto start\nlabel end\nimport writelastclear");
+}
+
+var save_as_new = function() {
+    var title = null;
+    var program_text = $('#program').val();
+    title = add_workshop_page(title, program_text, false, "workshop");
+    add_workshop_page(title, program_text, false, "save-modal-panel");
+    add_workshop_page(title, program_text, false, "open-modal-panel");
+    sudo_set_program(title, program_text);
+};
+
+var clear_tabs = function(tabpanel_id) {
+    $("#" + tabpanel_id + " ul.nav-tabs").empty();
+    $("#" + tabpanel_id + " div.tab-content").empty();
+}
+
+var clear_std_tabs = function() {
+    clear_tabs('workshop');
+    clear_tabs('save-modal-panel');
+    clear_tabs('open-modal-panel');
+}
+
+var load_library_from_cookie = function () {
+    replenish_std_lib();
+
+    var program_titles = get_titles();
+    var first = true;
+    for (var i = 0; i < program_titles.length; i++) {
+        var program_vernacular = get_vernacular(program_titles[i]);
+        add_workshop_page(program_titles[i], program_vernacular, first, "workshop");
+        add_workshop_page(program_titles[i], program_vernacular, first, "save-modal-panel");
+        add_workshop_page(program_titles[i], program_vernacular, first, "open-modal-panel");
+        first = false;
+    }
 };
 
 //
@@ -346,13 +419,79 @@ var eval_slow = function() {
 //
 
 $(document).ready(function() {
+    // load cookie data
+    load_library_from_cookie();
 
+    // prep editor tab
     extend_registers(1);
     eval_button_ready();
 
+    // click handlers
     $('#remove_register').click(remove_last_register);
     $('#add_register').click(add_one_register);
     $('#clear_program').click(clear_program);
     $('#evaluate').click(evaluate);
     $('#eval_slow').click(eval_slow);
+    $('a.wk-pload').click(load_program);
+    $('#save_as_new').click(function () {
+        $('#save-modal').modal('show');
+    });
+    $('#open').click(function () {
+        $('#open-modal').modal('show');
+    });
+    $('#save_new_btn').click( function() {
+        sudo_set_program($('#save_new_title').val(), $('#program').val());
+        clear_std_tabs();
+        load_library_from_cookie();
+        $('div.modal').modal('hide');
+    });
+
+    // keyboard inputs
+    $('body').keypress(function(e) {
+        if (e.keyCode == 27) {
+            $('div.modal').modal('hide');
+            $('*').blur();
+        }
+
+        // intercept other keyboard inputs only if not in a text area
+        if (!$('input,textarea').is(':focus')) {
+            if (e.which == 63) { // '?'
+                $("#help-modal").modal('show');
+            }
+
+            // these shortcuts are available for editor tab only
+            if ($("li[class=active] > #editor-tab").length) {
+                if (e.which == 114) { // 'r'
+                    $('#evaluate').click();
+                }
+                if (e.which == 115) { // 's'
+                    $('#save-modal').modal('show');
+                }
+                if (e.which == 111) {
+                    $('#open-modal').modal('show');
+                }
+                if (e.which == 99) { // 'c'
+                    $('#clear_program').click();
+                }
+                if (e.which == 119) { // 'w'
+                    $("#workshop-tab").click();
+                }
+            }
+
+            // these shortcuts are available for workshop tab only
+            if ($("li[class=active] > #workshop-tab").length) {
+                if (e.which == 101) { // 'e'
+                    $("#editor-tab").click();
+                }
+                if (e.which == 108) { // 'l'
+                    $('#workshop div[class="tab-pane active"] a').click();
+                }
+            }
+            
+            
+        }
+        
+    });
+
+    
 });

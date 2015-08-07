@@ -10,60 +10,227 @@
     <link rel="stylesheet" href="jsonesharp.css">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="jquery.cookie.js"></script>
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="library.js"></script>
+    <script src="preprocessing.js"></script>
     <script src="jsonesharp.js"></script>
+    <script src="interpreter.js"></script>
+
     
   </head>
   
-  <body>
-    <div class="container">
+<body>
+<div class="container">
 
       <!-- Page header -->
       
-      <div class="page-header">
-	<h4>js1#:
-	  <small>
-	    <span id="status">a 1# interpreter for web browsers</span>
-	  </small>
-	</h4>
-      </div>
-
-      <!-- Register machine starts here -->
-      <div class="form-horizontal" id="rm">
-
-	<label for="program">program editor</label>
-	<div class="form-group">
-	  <div class="col-sm-10">
-	    <textarea class="form-control" rows="10" id="program"></textarea>
-	  </div>
-	  <div class="col-sm-2 row-sm-offset-1">
-	    <div class="btn-group-vertical" role="group" aria-label="...">
-	      <button type="button" class="btn btn-default" id="clear_program">
-		clear
-	      </button>
-	      <button type="button" class="btn btn-default" id="add_register"></button>
-	      <button type="button" class="btn btn-default" id="remove_register"></button>
-	      <button type="button" class="btn btn-default" id="evaluate">
-		evaluate
-	      </button>
-	      <button type="button" class="btn btn-default" id="eval_slow">
-		eval slow
-	      </button>
-	      <button type="button" class="btn btn-default" id="interrupt">
-		interrupt
-	      </button>	      
-	    </div>
-	  </div>
+	<div class="page-header">
+		<h4>js1#:
+		<small>
+		<span id="status">a 1# interpreter for web browsers</span>
+		</small>
+		</h4>
 	</div>
 
-	<!-- Registers to appear here -->
-	
-      </div>
-      <!-- Register machine ends here -->
-      
-    </div>
+	<div role="tabpanel">
 
-    <div id="bottom_spacer"></div>
+	  <!-- Feature tabs -->
+	  <ul class="nav nav-tabs" role="tablist">
+	    <li role="presentation" class="active" data-toggle="tooltip" title="e">
+	    	<a href="#rm" aria-controls="rm" role="tab" data-toggle="tab" id="editor-tab">
+	    		program editor
+	    	</a>
+	    </li>
+	    <li role="presentation" data-toggle="tooltip" title="w">
+	    	<a href="#workshop" aria-controls="workshop" role="tab" data-toggle="tab" id="workshop-tab">workshop</a>
+	    </li>
+	  </ul>
+
+	  <!-- Feature panes -->
+	  <div class="tab-content">
+  	      <!-- Register machine starts here -->
+		  	<div role="tabpanel" class="tab-pane active form-horizontal" id="rm">
+				<div class="form-group">
+				  <div class="col-sm-10">
+				    <textarea class="form-control" rows="10" tabindex="1" id="program"></textarea>
+				  </div>
+				  <div class="col-sm-2 row-sm-offset-1">
+				    <div class="btn-group-vertical" role="group" aria-label="...">
+		    		  
+				      <button type="button" class="btn btn-default rr-smalltext" 
+				      data-toggle="tooltip" title="c" id="clear_program">
+						clear
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="add_register"></button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="remove_register"></button>
+				      <button type="button" class="btn btn-default rr-smalltext" 
+				      data-toggle="tooltip" title="r" id="evaluate">
+						evaluate
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="eval_slow">
+						eval slow
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="interrupt">
+						interrupt
+				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" id="open" data-toggle="tooltip" title="o">
+				      	open
+				      </button> 
+				      <button type="button" class="btn btn-default rr-smalltext" id="save_as_new" data-toggle="tooltip" title="s">
+				      	save
+				      </button> 
+				    </div>
+				  </div>
+				</div>
+
+			<!-- Registers to appear here -->
+			
+			</div>
+		      <!-- Register machine ends here -->
+		    <!-- Workshop starts here -->
+		    <div role="tabpanel" class="tab-pane" id="workshop">
+		    	<div role="tabpanel">
+		    		<div class="row">
+		    			<div class="col-sm-3">
+				    		<ul class="nav nav-tabs nav-stacked" role="tablist">
+				    		</ul>
+			    		</div>
+		    			<div class="col-sm-9">
+				    		<div class="tab-content">
+			    			</div>
+		    			</div>
+	    			</div>
+	    		</div>
+		    </div>
+		    <!-- Workshop ends here -->
+	  </div>
+    </div>
+</div>
+
+<div id="bottom_spacer"></div>
     
+<div class="modal fade" id="help-modal">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title">Help <kbd>?</kbd></h3>
+      </div>
+      <div class="modal-body">
+      	<div class="container-fluid">
+      		<div class="row">
+      			<div class="col-sm-6">
+			      	<p>
+			      		<h4>General</h4>
+			      		<kbd>Esc</kbd>: deselect text area, exit help dialog
+
+			  			<h4>Editor <kbd>e</kbd> </h4>
+			  			<kbd>c</kbd>: clear program register <br>
+			  			<kbd>r</kbd>: run program <br>
+
+			  			<h4>Workshop <kbd>w</kbd> </h4>
+			  			<kbd>l</kbd>: load displayed program into register <br>
+
+			      	</p>
+		      	</div>
+		      	<div class="col-sm-6">
+		      		<h4>1# Syntax Reference</h4>
+		      		<p>
+		      			<ul>
+			      			<li>1<sup>n</sup>#: Add a 1 to Rn</li>
+			      			<li>1<sup>n</sup>##: Add a # to Rn</li>
+			      			<li>1<sup>n</sup>###: Forward n instructions</li>
+			      			<li>1<sup>n</sup>####: Back n instructions</li>
+			      			<li>1<sup>n</sup>#####: Cases on Rn</li>
+			      		</ul>
+						Additions are made on the right. Control moves forward 1 instruction at the end of an addition.
+						<br><br>
+						Cases on Rn destroys the leftmost symbol in Rn
+						and tests it. The result of this test determines the control flow.
+						<ul>
+							<li>if empty, forward 1 instruction</li>
+							<li>if 1, forward 2 instructions</li>
+							<li>if #, forward 3 instructions</li>
+						</ul>
+						Whitespace insensitive. The interpreter ignores symbols after a ';' in a line.
+					</p>
+		      	</div>
+		    </div>
+		</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="save-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Save program</h4>
+      </div>
+      <div class="modal-body">
+      	<div class="container-fluid">
+      		<h5>&bull; Overwrite...</h5>
+      		<div role="tabpanel" class="tab-pane" id="save-modal-panel">
+		    	<div role="tabpanel">
+		    		<div class="row">
+		    			<div class="col-sm-4">
+				    		<ul class="nav nav-tabs nav-stacked" role="tablist">
+				    		</ul>
+			    		</div>
+		    			<div class="col-sm-8">
+				    		<div class="tab-content">
+			    			</div>
+		    			</div>
+	    			</div>
+	    		</div>
+		    </div>
+		    <hr/>
+		    <h5>&bull; or save as new:</h5>
+		    <form action="" class="form-inline">
+		    	<div class="form-group">
+		    		<label for="save_new_title" class="sr-only">Program title</label>
+		    		<input type="text" class="form-control" id="save_new_title"placeholder="program title">
+		    		<a class="btn btn-primary" id="save_new_btn" role="button" type="button">save as new</a>
+		    	</div>
+		    </form>
+      	</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="open-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Open program</h4>
+      </div>
+      <div class="modal-body">
+      	<div class="container-fluid">
+      		<div role="tabpanel" class="tab-pane" id="open-modal-panel">
+		    	<div role="tabpanel">
+		    		<div class="row">
+		    			<div class="col-sm-4">
+				    		<ul class="nav nav-tabs nav-stacked" role="tablist">
+				    		</ul>
+			    		</div>
+		    			<div class="col-sm-8">
+				    		<div class="tab-content">
+			    			</div>
+		    			</div>
+	    			</div>
+	    		</div>
+		    </div>
+      	</div>
+      </div>
+    </div>
+  </div>
+</div>
+
   </body>
+  <script>
+  	$("[data-toggle='tooltip']").tooltip();
+  </script>
 </html>
